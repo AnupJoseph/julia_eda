@@ -43,7 +43,7 @@ I am going to use the `DataFrames.jl` and `Gadfly.jl` libraries for most of the 
 """
 
 # ╔═╡ 82b83358-fa4c-47ea-b06a-514d89822a6b
-dataset = CSV.read("kaggle_survey_2022_responses.csv\\kaggle_survey_2022_responses.csv",DataFrame,header=2)
+dataset = CSV.read("data\\kaggle_survey_2022_responses.csv",DataFrame,header=2)
 # The first row is just the list of Questions from Q1 to Q47 and not particularly interesting
 
 # ╔═╡ 6003b647-f50b-4a41-a0b0-6785e2f98de5
@@ -124,6 +124,41 @@ Gadfly.with_theme(:dark) do
 		Guide.ylabel("% distribution of the survey respondents"),
 		Geom.bar)
 	# draw(SVG("kaggle_barplot.svg"),barplot)
+end
+
+# ╔═╡ 17264c22-0102-46ac-9773-c9ab78be513f
+md"""
+As you would expect the bulk of the respondents, almost 60% infact, are between 18–30s. Not particularly surprising given the respondents would be mostly Kaggle users themselves, though I suspect there's some disconnect here between the survey and actual industry trends. This is of course, just baseless speculation, so don't take it too seriously.
+"""
+
+# ╔═╡ f3768ad7-4f1c-4d79-a628-773b1503747b
+Gadfly.with_theme(:dark) do
+
+	# Subset the data with only rows I need
+	gender,age = names(dataset)[3],names(dataset)[2]
+	age_with_gender_data = dataset[!,2:3]
+
+	# grouby age and gender and then count
+	age_and_gender_counts = combine(
+		groupby(
+			age_with_gender_data,[gender,age])
+		, nrow => :n
+	)
+
+	# Sort the results by age
+	sort!(age_and_gender_counts,age)
+
+	
+	age_gender_plot = plot(
+		age_and_gender_counts,
+		x=age,
+		y=:n,
+		color=gender,
+		style(bar_spacing=2mm),
+		Guide.ylabel("Frequency"),
+		Geom.bar
+	)
+	# draw(SVG("kaggle_age_gender_plot.svg"),age_gender_plot)
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -841,5 +876,7 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╠═86f87803-6f15-4d42-94d6-0a245684f461
 # ╟─c5c1dff8-dc47-4745-b03c-0af40c32c752
 # ╠═57574f4f-9889-4e1c-8c0b-3ba6396ae7d4
+# ╟─17264c22-0102-46ac-9773-c9ab78be513f
+# ╠═f3768ad7-4f1c-4d79-a628-773b1503747b
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
