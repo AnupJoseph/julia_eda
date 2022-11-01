@@ -161,6 +161,31 @@ Gadfly.with_theme(:dark) do
 	# draw(SVG("kaggle_age_gender_plot.svg"),age_gender_plot)
 end
 
+# ╔═╡ 08c28746-ff7f-4a3e-8e6e-8ee6108ff88b
+md"""
+The trends in this graph accurately capture my own experience, i.e. my Data Science and AI teachers were overwhelmingly men, while my own colleagues and peers aren't.
+
+While we are on the topic of experience and age groups lets take a look at the experience levels of the repondents. Interestingly there are two variables we can look at while checking experience. We have `"For how many years have you been writing code and/or programming?"` and `"For how many years have you used machine learning methods?"`. I am going to take in `"For how many years have you been writing code and/or programming?"` and not just specific ML experience as that question is a bit too specific to me, e.g. would a scientist who has been using Data Science tools for sometime, not fall under the 2nd question because they have never used a ML model? I don't know. Also the next variable we are going to look at income will more strongly correlate with years of experience rather than just ML experience I think.
+"""
+
+# ╔═╡ c33123b8-876d-42c6-a9ba-6c1a2b77a09a
+Gadfly.with_theme(:dark) do
+	programming_exp = "For how many years have you been writing code and/or programming?"
+	experience_subset = select(dataset,programming_exp)
+	filter!(programming_exp => x->!ismissing(x),experience_subset)
+	experience_counts = combine(
+		groupby(experience_subset,programming_exp),
+		nrow=>:num_counts
+	)
+	sort!(experience_counts,programming_exp)
+	experience_plot = plot(
+		experience_counts,
+		x=programming_exp,
+		y=:num_counts,
+		Geom.bar
+	)
+end
+
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
@@ -878,5 +903,7 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╠═57574f4f-9889-4e1c-8c0b-3ba6396ae7d4
 # ╟─17264c22-0102-46ac-9773-c9ab78be513f
 # ╠═f3768ad7-4f1c-4d79-a628-773b1503747b
+# ╟─08c28746-ff7f-4a3e-8e6e-8ee6108ff88b
+# ╠═c33123b8-876d-42c6-a9ba-6c1a2b77a09a
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
