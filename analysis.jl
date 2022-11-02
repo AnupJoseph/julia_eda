@@ -172,18 +172,48 @@ While we are on the topic of experience and age groups lets take a look at the e
 Gadfly.with_theme(:dark) do
 	programming_exp = "For how many years have you been writing code and/or programming?"
 	experience_subset = select(dataset,programming_exp)
+
+	# Filter missing variables and count the number of respondents per each group
 	filter!(programming_exp => x->!ismissing(x),experience_subset)
 	experience_counts = combine(
 		groupby(experience_subset,programming_exp),
 		nrow=>:num_counts
 	)
+
+	# Make custom color scheme
+	colors = [colorant"#FE4365" for x=1:6]
+	push!(colors,colorant"gray")
 	sort!(experience_counts,programming_exp)
+
+	
 	experience_plot = plot(
 		experience_counts,
 		x=programming_exp,
 		y=:num_counts,
+		color=colors,
+		style(bar_spacing=2mm),
 		Geom.bar
 	)
+	# draw(SVG("kaggle_experience_plot.svg"),experience_plot)
+end
+
+# ╔═╡ 21c988fc-2c39-4b33-a748-7dabb5e74ea3
+names(dataset)
+
+# ╔═╡ 8208c810-39cf-40d5-ba4f-b06f50c4988a
+begin
+	income_col,exp_col = 
+	"What is your current yearly compensation (approximate \$USD)?","For how many years have you been writing code and/or programming?"
+	income_subset = select(dataset,[income_col,exp_col])
+	filter!(exp_col => x->!ismissing(x),income_subset)
+	filter!(income_col => x->!ismissing(x),income_subset)
+	income_exp_counts = combine(
+		groupby(income_subset
+			,[income_col,exp_col]),
+		nrow=>:num_counts
+	)
+	sort!(income_exp_counts,exp_col)
+	plot(income_exp_counts,x=exp_col,y=income_col,color=:num_counts,Geom.rectbin)
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -905,5 +935,7 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╠═f3768ad7-4f1c-4d79-a628-773b1503747b
 # ╟─08c28746-ff7f-4a3e-8e6e-8ee6108ff88b
 # ╠═c33123b8-876d-42c6-a9ba-6c1a2b77a09a
+# ╠═21c988fc-2c39-4b33-a748-7dabb5e74ea3
+# ╠═8208c810-39cf-40d5-ba4f-b06f50c4988a
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
