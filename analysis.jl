@@ -202,6 +202,7 @@ names(dataset)
 
 # ╔═╡ 8208c810-39cf-40d5-ba4f-b06f50c4988a
 begin
+	set_default_plot_size(20cm ,15cm)
 	income_col,exp_col = 
 	"What is your current yearly compensation (approximate \$USD)?","For how many years have you been writing code and/or programming?"
 	income_subset = select(dataset,[income_col,exp_col])
@@ -215,6 +216,9 @@ begin
 	sort!(income_exp_counts,exp_col)
 	plot(income_exp_counts,x=exp_col,y=income_col,color=:num_counts,Geom.rectbin)
 end
+
+# ╔═╡ 6869665b-74f5-4c67-b7af-2494a0b20f3c
+occursin("a","yui")
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -937,5 +941,6 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╠═c33123b8-876d-42c6-a9ba-6c1a2b77a09a
 # ╠═21c988fc-2c39-4b33-a748-7dabb5e74ea3
 # ╠═8208c810-39cf-40d5-ba4f-b06f50c4988a
+# ╠═6869665b-74f5-4c67-b7af-2494a0b20f3c
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
