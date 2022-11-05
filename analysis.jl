@@ -12,6 +12,7 @@ begin
 	using StatsBase
 	using Colors
 	using DataStructures
+	using ColorSchemes
 
 	# import Cairo,Fontconfig
 end
@@ -197,12 +198,30 @@ Gadfly.with_theme(:dark) do
 	# draw(SVG("kaggle_experience_plot.svg"),experience_plot)
 end
 
-# ╔═╡ 21c988fc-2c39-4b33-a748-7dabb5e74ea3
-names(dataset)
+# ╔═╡ 1e199d4b-a360-499a-b439-a7dbb3f66226
+md"""
+Let's talk about the money
+"""
+
+# ╔═╡ 992a66b9-059a-449c-8565-d325af9d1dfb
+function build_median_income(x)
+	x =strip(x,['>','\$','<'])
+	if occursin("-",x)
+		low,high = split(x,"-")
+		low = parse(Int,replace(low,","=>""))
+		high = parse(Int,replace(high,","=>""))
+		
+		return (low+high)/2
+	else
+		x = parse(Int,replace(x,","=>""))
+		
+		return x==1000000 ? x : x/2
+	end
+end
 
 # ╔═╡ 8208c810-39cf-40d5-ba4f-b06f50c4988a
-begin
-	set_default_plot_size(20cm ,15cm)
+Gadfly.with_theme(:dark) do
+	set_default_plot_size(25cm ,15cm)
 	income_col,exp_col = 
 	"What is your current yearly compensation (approximate \$USD)?","For how many years have you been writing code and/or programming?"
 	income_subset = select(dataset,[income_col,exp_col])
@@ -213,17 +232,21 @@ begin
 			,[income_col,exp_col]),
 		nrow=>:num_counts
 	)
-	sort!(income_exp_counts,exp_col)
-	plot(income_exp_counts,x=exp_col,y=income_col,color=:num_counts,Geom.rectbin)
-end
+	income_exp_counts[!,:median_income] = build_median_income.(income_exp_counts[!,income_col])
+	
+	sort!(income_exp_counts,:median_income)
 
-# ╔═╡ 6869665b-74f5-4c67-b7af-2494a0b20f3c
-occursin("a","yui")
+	palettef(c) = get(ColorSchemes.algae,c)
+	income_by_experience = plot(income_exp_counts,x=exp_col,y=income_col,color=:num_counts,Geom.rectbin,Scale.color_continuous(colormap=palettef))
+
+	# draw(SVG("kaggle_income_by_experience_plot.svg"),income_by_experience)
+end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
+ColorSchemes = "35d6a980-a343-548e-a6ea-1d62b119f2f4"
 Colors = "5ae59095-9a9b-59fe-a467-6f913c188581"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
@@ -232,6 +255,7 @@ StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 
 [compat]
 CSV = "~0.10.4"
+ColorSchemes = "~3.19.0"
 Colors = "~0.12.8"
 DataFrames = "~1.4.1"
 DataStructures = "~0.18.13"
@@ -309,11 +333,23 @@ git-tree-sha1 = "ded953804d019afa9a3f98981d99b33e3db7b6da"
 uuid = "944b1d66-785c-5afd-91f1-9de20f533193"
 version = "0.7.0"
 
+[[deps.ColorSchemes]]
+deps = ["ColorTypes", "ColorVectorSpace", "Colors", "FixedPointNumbers", "Random"]
+git-tree-sha1 = "1fd869cc3875b57347f7027521f561cf46d1fcd8"
+uuid = "35d6a980-a343-548e-a6ea-1d62b119f2f4"
+version = "3.19.0"
+
 [[deps.ColorTypes]]
 deps = ["FixedPointNumbers", "Random"]
 git-tree-sha1 = "eb7f0f8307f71fac7c606984ea5fb2817275d6e4"
 uuid = "3da002f7-5984-5a60-b8a6-cbb66c0b333f"
 version = "0.11.4"
+
+[[deps.ColorVectorSpace]]
+deps = ["ColorTypes", "FixedPointNumbers", "LinearAlgebra", "SpecialFunctions", "Statistics", "TensorCore"]
+git-tree-sha1 = "d08c20eef1f2cbc6e60fd3612ac4340b89fea322"
+uuid = "c3611d14-8923-5661-9e6a-0046d554d3a4"
+version = "0.9.9"
 
 [[deps.Colors]]
 deps = ["ColorTypes", "FixedPointNumbers", "Reexport"]
@@ -873,6 +909,12 @@ version = "1.10.0"
 deps = ["ArgTools", "SHA"]
 uuid = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
 
+[[deps.TensorCore]]
+deps = ["LinearAlgebra"]
+git-tree-sha1 = "1feb45f88d133a655e001435632f019a9a1bcdb6"
+uuid = "62fd8b95-f654-4bbd-a8a5-9c27f68ccd50"
+version = "0.1.1"
+
 [[deps.Test]]
 deps = ["InteractiveUtils", "Logging", "Random", "Serialization"]
 uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
@@ -939,8 +981,8 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╠═f3768ad7-4f1c-4d79-a628-773b1503747b
 # ╟─08c28746-ff7f-4a3e-8e6e-8ee6108ff88b
 # ╠═c33123b8-876d-42c6-a9ba-6c1a2b77a09a
-# ╠═21c988fc-2c39-4b33-a748-7dabb5e74ea3
+# ╠═1e199d4b-a360-499a-b439-a7dbb3f66226
+# ╠═992a66b9-059a-449c-8565-d325af9d1dfb
 # ╠═8208c810-39cf-40d5-ba4f-b06f50c4988a
-# ╠═6869665b-74f5-4c67-b7af-2494a0b20f3c
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
