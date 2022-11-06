@@ -200,7 +200,13 @@ end
 
 # ╔═╡ 1e199d4b-a360-499a-b439-a7dbb3f66226
 md"""
-Let's talk about the money
+Pretty much as you would expect, data science is a fairly young field, Kaggle's audience even more so. Most of the respondents are between 0-5 years of experience in writing code. Now, let's talk about the money involved. This is actually really interesting. I am going to hypothesize that we'll find a clear divide between practioners in India and the USA, mostly due to dollar-to-rupee conversion rate.
+"""
+
+# ╔═╡ b248e4d2-5e91-42c0-94ad-0ea301b9e59b
+md"""
+We need some preprocessing so ensure that we can actually sort the incomes and ages. There's mulitple ways we could go about it, but my plan is to simply create a median value for both income and age columns
+> Yes, I know, I know these function don't build an actual median but its the intention which is the point
 """
 
 # ╔═╡ 992a66b9-059a-449c-8565-d325af9d1dfb
@@ -214,17 +220,38 @@ function build_median_income(x)
 		return (low+high)/2
 	else
 		x = parse(Int,replace(x,","=>""))
-		
 		return x==1000000 ? x : x/2
 	end
 end
 
+# ╔═╡ 9158601d-81b1-4531-9bf6-0554780c281a
+function build_median_age(x)
+	if x == "I have never written code"
+		return 0
+	elseif x == "< 1 years"
+		return 0.5
+	elseif x == "20+ years"
+		return 25
+	else
+		x = replace(x,"years"=>""," "=>"")
+		low,high = split(x,"-")
+		low,high = parse(Int,low),parse(Int,high)
+		return (low+high)/2
+	end
+end
+
+# ╔═╡ b1fa4f79-466d-42d9-9406-28abbd27c92e
+md"""
+I think a heatmap is a good choice here since we need to count a lot of categories. We can use the rectangular binning from Gafly, I think.
+"""
+
 # ╔═╡ 8208c810-39cf-40d5-ba4f-b06f50c4988a
 Gadfly.with_theme(:dark) do
-	set_default_plot_size(25cm ,15cm)
 	income_col,exp_col = 
 	"What is your current yearly compensation (approximate \$USD)?","For how many years have you been writing code and/or programming?"
 	income_subset = select(dataset,[income_col,exp_col])
+
+	# Clean out all the missing entries as they are way too hard to deal here
 	filter!(exp_col => x->!ismissing(x),income_subset)
 	filter!(income_col => x->!ismissing(x),income_subset)
 	income_exp_counts = combine(
@@ -232,15 +259,33 @@ Gadfly.with_theme(:dark) do
 			,[income_col,exp_col]),
 		nrow=>:num_counts
 	)
-	income_exp_counts[!,:median_income] = build_median_income.(income_exp_counts[!,income_col])
-	
-	sort!(income_exp_counts,:median_income)
 
+	# Create the median income columns
+	income_exp_counts[!,:median_income] = build_median_income.(income_exp_counts[!,income_col])
+	sort!(income_exp_counts,:median_income)
+	income_exp_counts[!,:median_age] = build_median_age.(income_exp_counts[!,exp_col])
+	sort!(income_exp_counts,:median_age)
+
+	# Get a nice color scheme
 	palettef(c) = get(ColorSchemes.algae,c)
-	income_by_experience = plot(income_exp_counts,x=exp_col,y=income_col,color=:num_counts,Geom.rectbin,Scale.color_continuous(colormap=palettef))
+
+	# Plot the graph as a heatmap
+	income_by_experience = plot(
+		income_exp_counts,
+		x=exp_col,
+		y=income_col,
+		color=:num_counts,
+		Geom.rectbin,
+		Scale.color_continuous(colormap=palettef)
+	)
 
 	# draw(SVG("kaggle_income_by_experience_plot.svg"),income_by_experience)
 end
+
+# ╔═╡ daeaa14d-f3f5-4914-92f4-f92a130753a7
+md"""
+The graph is fairly as you would expect, though the $0-999 is a bit too dark. Maybe the number of students in this particularly high, though that still beggars belief.
+"""
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -981,8 +1026,12 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╠═f3768ad7-4f1c-4d79-a628-773b1503747b
 # ╟─08c28746-ff7f-4a3e-8e6e-8ee6108ff88b
 # ╠═c33123b8-876d-42c6-a9ba-6c1a2b77a09a
-# ╠═1e199d4b-a360-499a-b439-a7dbb3f66226
+# ╟─1e199d4b-a360-499a-b439-a7dbb3f66226
+# ╠═b248e4d2-5e91-42c0-94ad-0ea301b9e59b
 # ╠═992a66b9-059a-449c-8565-d325af9d1dfb
+# ╠═9158601d-81b1-4531-9bf6-0554780c281a
+# ╠═b1fa4f79-466d-42d9-9406-28abbd27c92e
 # ╠═8208c810-39cf-40d5-ba4f-b06f50c4988a
+# ╠═daeaa14d-f3f5-4914-92f4-f92a130753a7
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
