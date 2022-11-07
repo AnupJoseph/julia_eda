@@ -284,8 +284,29 @@ end
 
 # ╔═╡ daeaa14d-f3f5-4914-92f4-f92a130753a7
 md"""
-The graph is fairly as you would expect, though the $0-999 is a bit too dark. Maybe the number of students in this particularly high, though that still beggars belief.
+The graph is generally as you would expect, though the $0-999 is a bit too dark. Maybe the number of students in this particularly high, though that explanation still beggars belief. Anyway that's enough demographics. Let's switch up a bit and start talking about the various languages and tools used by the respondents and then maybe we can look in terms of tools used in the specific part of the ML lifecycle.
 """
+
+# ╔═╡ 60b42c85-7905-4057-b39f-a6749800f9ba
+md"""
+# Tools and techniques
+Let's look at the programming languages and IDEs used by practitioners. I can practically guarantee this is Python and Jupyter Notebook but let's do it anyway.
+"""
+
+# ╔═╡ cde72841-8747-4894-8a54-9d92036ba80c
+names(dataset)
+
+# ╔═╡ ad25d31f-b036-4435-834c-5e5de3271209
+begin
+	language_subset = select(dataset,31:45)
+	display(names(language_subset))
+	language_counts = [count(!ismissing,col) for col in eachcol(language_subset)]
+	non_users = size(dataset)[1] .- language_counts
+	
+end
+
+# ╔═╡ e9b27332-8b3e-4c8f-9044-956301d82c80
+? count
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1032,6 +1053,10 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╠═9158601d-81b1-4531-9bf6-0554780c281a
 # ╠═b1fa4f79-466d-42d9-9406-28abbd27c92e
 # ╠═8208c810-39cf-40d5-ba4f-b06f50c4988a
-# ╠═daeaa14d-f3f5-4914-92f4-f92a130753a7
+# ╟─daeaa14d-f3f5-4914-92f4-f92a130753a7
+# ╠═60b42c85-7905-4057-b39f-a6749800f9ba
+# ╠═cde72841-8747-4894-8a54-9d92036ba80c
+# ╠═ad25d31f-b036-4435-834c-5e5de3271209
+# ╠═e9b27332-8b3e-4c8f-9044-956301d82c80
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
