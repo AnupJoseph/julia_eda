@@ -36,6 +36,11 @@ Recently, Kaggle published their annual "Machine Learning and Data Science Surve
 More likely, its representative of active Kaggle members with the time and inclination to fill out a fairly long survey. Still I think it would be fun to explore this data and see how the Kaggle community shapes up. Plus, Kaggle (still) [does not support Julia](https://www.kaggle.com/product-feedback/83644) in its kernels so maybe this post with push them down that path. It certainly won't but one can hope
 """
 
+# ╔═╡ 8b500546-9974-43ed-b4af-9676e3e5e244
+md"""
+So you might have notices that the plots seem to go out of the page a bit. For some reason Pluto does not seem to have a full page option. So if you want to keep the page in either comment out this line `set_default_plot_size(25cm ,15cm)` or play around with it
+"""
+
 # ╔═╡ 84b81005-36df-464d-863b-617f73b96618
 md"""
 The survey consisted of 43 questions containing both multiple choice question with only one selection allowed and multiple selection questions. It generated almost 24,000 responses, with each line representing the choices of an individual respondent. The dataset is available under a Creative Commons licence [here](https://www.kaggle.com/competitions/kaggle-survey-2022/data). 
@@ -247,6 +252,7 @@ I think a heatmap is a good choice here since we need to count a lot of categori
 
 # ╔═╡ 8208c810-39cf-40d5-ba4f-b06f50c4988a
 Gadfly.with_theme(:dark) do
+	
 	income_col,exp_col = 
 	"What is your current yearly compensation (approximate \$USD)?","For how many years have you been writing code and/or programming?"
 	income_subset = select(dataset,[income_col,exp_col])
@@ -284,29 +290,28 @@ end
 
 # ╔═╡ daeaa14d-f3f5-4914-92f4-f92a130753a7
 md"""
-The graph is generally as you would expect, though the $0-999 is a bit too dark. Maybe the number of students in this particularly high, though that explanation still beggars belief. Anyway that's enough demographics. Let's switch up a bit and start talking about the various languages and tools used by the respondents and then maybe we can look in terms of tools used in the specific part of the ML lifecycle.
+The graph is generally as you would expect, though the $0-999 is a bit too dark. Maybe the number of students in this particularly high, though that explanation still beggars belief. 
 """
 
-# ╔═╡ 60b42c85-7905-4057-b39f-a6749800f9ba
-md"""
-# Tools and techniques
-Let's look at the programming languages and IDEs used by practitioners. I can practically guarantee this is Python and Jupyter Notebook but let's do it anyway.
-"""
+# ╔═╡ 05b6bb4e-bde7-436c-b58b-c7dc40b05fa0
+Gadfly.with_theme(:dark) do
+	set_default_plot_size(30cm ,15cm)
+	size_col,income_col = "What is the size of the company where you are employed?","What is your current yearly compensation (approximate \$USD)?"
+	size_df = select(dataset,[size_col,income_col])
 
-# ╔═╡ cde72841-8747-4894-8a54-9d92036ba80c
-names(dataset)
+	filter!(size_col => x->!ismissing(x),size_df)
+	filter!(income_col => x->!ismissing(x),size_df)
 
-# ╔═╡ ad25d31f-b036-4435-834c-5e5de3271209
-begin
-	language_subset = select(dataset,31:45)
-	display(names(language_subset))
-	language_counts = [count(!ismissing,col) for col in eachcol(language_subset)]
-	non_users = size(dataset)[1] .- language_counts
 	
+	size_df[!,:median_income] = build_median_income.(size_df[!,income_col])
+	
+	
+	plot(size_df, x=:median_income, color=size_col, Geom.density,Guide.xlabel("Median income (increasing)"))
 end
 
-# ╔═╡ e9b27332-8b3e-4c8f-9044-956301d82c80
-? count
+# ╔═╡ 30db4338-81cb-4b65-a8ad-af39fd8631d6
+md"""
+Nothing as such surpising here. The maximum number of respondents belong to 0–49 category and as you would expect aren't in the higher income brackets. They are essentially startups and most startups don't make too much money."""
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1031,6 +1036,7 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╟─ba902c77-0812-46c9-82da-8fb63ee0d605
 # ╟─ebe16f4b-abcb-4b2e-948e-74ece7f1db95
 # ╟─4ff397ec-7217-4ce3-9d6a-7b873c3e3489
+# ╟─8b500546-9974-43ed-b4af-9676e3e5e244
 # ╟─84b81005-36df-464d-863b-617f73b96618
 # ╠═ca575050-4fb8-11ed-1985-a35bad340c3e
 # ╠═82b83358-fa4c-47ea-b06a-514d89822a6b
@@ -1053,10 +1059,8 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╠═9158601d-81b1-4531-9bf6-0554780c281a
 # ╠═b1fa4f79-466d-42d9-9406-28abbd27c92e
 # ╠═8208c810-39cf-40d5-ba4f-b06f50c4988a
-# ╟─daeaa14d-f3f5-4914-92f4-f92a130753a7
-# ╠═60b42c85-7905-4057-b39f-a6749800f9ba
-# ╠═cde72841-8747-4894-8a54-9d92036ba80c
-# ╠═ad25d31f-b036-4435-834c-5e5de3271209
-# ╠═e9b27332-8b3e-4c8f-9044-956301d82c80
+# ╠═daeaa14d-f3f5-4914-92f4-f92a130753a7
+# ╠═05b6bb4e-bde7-436c-b58b-c7dc40b05fa0
+# ╠═30db4338-81cb-4b65-a8ad-af39fd8631d6
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
